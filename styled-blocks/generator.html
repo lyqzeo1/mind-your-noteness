@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Block Foundry — styled blocks for Notion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f0e6;
+    --paper-deep: #ece5d5;
+    --ink: #1d1a16;
+    --ink-soft: #57503f;
+    --ink-faint: #8a8271;
+    --line: #d8cfba;
+    --accent: #d94f2b;
+    --accent-ink: #b23a1c;
+    --card: #fbf8f1;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --sans: "IBM Plex Sans", -apple-system, sans-serif;
+    --display: "Fraunces", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    color: var(--ink);
+    background:
+      repeating-linear-gradient(0deg, rgba(29,26,22,.025) 0 1px, transparent 1px 3px),
+      var(--paper);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 22px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--paper);
+    flex: none;
+    animation: dropIn .5s cubic-bezier(.2,.9,.3,1) both;
+  }
+  @keyframes dropIn { from { transform: translateY(-100%); } }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -.02em;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .wordmark em { color: var(--accent); font-style: italic; font-weight: 600; }
+  .wordmark .sub {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  header .spacer { flex: 1; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: 2.5px 2.5px 0 var(--ink);
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:hover { transform: translate(-1px,-1px); box-shadow: 3.5px 3.5px 0 var(--ink); }
+  .btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--ink); }
+  .btn.primary:hover { background: var(--accent-ink); }
+  .btn.ghost { box-shadow: none; border-color: var(--line); color: var(--ink-soft); }
+  .btn.ghost:hover { border-color: var(--ink); color: var(--ink); transform: none; }
+
+  /* ---------- layout ---------- */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 292px 1fr 296px;
+    min-height: 0;
+  }
+  .panel {
+    overflow-y: auto;
+    padding: 18px;
+    background: var(--paper);
+  }
+  .panel.left  { border-right: 1.5px solid var(--line); animation: fadeUp .5s .08s cubic-bezier(.2,.9,.3,1) both; }
+  .panel.right { border-left: 1.5px solid var(--line);  animation: fadeUp .5s .16s cubic-bezier(.2,.9,.3,1) both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } }
+
+  .panel h2 {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .panel section + section { margin-top: 24px; }
+
+  /* library */
+  .library { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lib-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    text-align: left;
+    padding: 10px 10px 9px;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    background: var(--card);
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: border-color .12s, transform .12s, box-shadow .12s;
+  }
+  .lib-item:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+    transform: translateY(-1px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  .lib-item .glyph { font-size: 15px; line-height: 1; }
+
+  /* layer list */
+  .layers { display: flex; flex-direction: column; gap: 6px; }
+  .layer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    background: var(--card);
+    cursor: pointer;
+    font-size: 12.5px;
+    transition: border-color .12s, background .12s;
+  }
+  .layer:hover { border-color: var(--ink-faint); }
+  .layer.selected { border-color: var(--accent); background: #fdf3ef; }
+  .layer .dot { width: 9px; height: 9px; border-radius: 3px; flex: none; border: 1px solid rgba(0,0,0,.25); }
+  .layer .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+  .layer .kind { font-family: var(--mono); font-size: 9.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .08em; }
+  .icon-btn {
+    border: none; background: none; cursor: pointer; padding: 2px 3px;
+    color: var(--ink-faint); font-size: 12px; line-height: 1; border-radius: 4px;
+  }
+  .icon-btn:hover { color: var(--ink); background: var(--paper-deep); }
+  .layers-empty { font-size: 12px; color: var(--ink-faint); padding: 6px 2px; font-style: italic; }
+
+  /* ---------- preview ---------- */
+  .stage {
+    position: relative;
+    overflow-y: auto;
+    background:
+      radial-gradient(rgba(29,26,22,.10) 1px, transparent 1px) 0 0/18px 18px,
+      var(--paper-deep);
+    padding: 36px 32px 72px;
+    animation: fadeUp .5s .12s cubic-bezier(.2,.9,.3,1) both;
+  }
+  .stage-label {
+    position: sticky; top: 0; z-index: 2;
+    display: flex; justify-content: center; pointer-events: none;
+    margin-bottom: 18px;
+  }
+  .stage-label span {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--ink-faint);
+    background: var(--paper-deep); padding: 3px 12px; border-radius: 99px;
+    border: 1px solid var(--line);
+  }
+  .page {
+    margin: 0 auto;
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    box-shadow: 6px 6px 0 rgba(29,26,22,.9);
+    border-radius: 4px;
+    padding: 34px 30px 44px;
+    transition: max-width .2s ease, background .2s ease;
+  }
+  .page .blocks { display: flex; flex-direction: column; gap: 16px; }
+  .pv-wrap { position: relative; border-radius: 6px; }
+  .pv-wrap::after {
+    content: "";
+    position: absolute; inset: -4px;
+    border: 1.5px dashed transparent;
+    border-radius: 8px;
+    pointer-events: none;
+    transition: border-color .12s;
+  }
+  .pv-wrap:hover::after { border-color: var(--ink-faint); }
+  .pv-wrap.selected::after { border-color: var(--accent); border-style: solid; }
+  .pv-wrap { cursor: pointer; }
+  .page-empty {
+    text-align: center; padding: 70px 20px; color: var(--ink-faint);
+    font-family: var(--display); font-style: italic; font-size: 17px;
+  }
+
+  /* ---------- inspector ---------- */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  .field input[type=text], .field textarea, .field select {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 7px 9px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .field textarea { resize: vertical; min-height: 60px; line-height: 1.45; }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .field-row { display: flex; gap: 10px; }
+  .field-row .field { flex: 1; }
+  .swatch-row { display: flex; align-items: center; gap: 8px; }
+  .swatch-row input[type=color] {
+    width: 34px; height: 28px; padding: 2px;
+    border: 1.5px solid var(--line); border-radius: 6px;
+    background: var(--card); cursor: pointer;
+  }
+  .swatch-row output { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+  .field input[type=range] { width: 100%; accent-color: var(--accent); }
+  .range-val { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); float: right; }
+  .inspector-empty { font-size: 12.5px; color: var(--ink-faint); font-style: italic; padding: 4px 2px 14px; }
+  .danger-row { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: 26px; left: 50%;
+    transform: translate(-50%, 16px);
+    background: var(--ink); color: var(--paper);
+    font-family: var(--mono); font-size: 12px; letter-spacing: .05em;
+    padding: 11px 20px; border-radius: 8px;
+    box-shadow: 4px 4px 0 rgba(217,79,43,.85);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s, transform .2s;
+    z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Block<em>Foundry</em>
+    <span class="sub">styled blocks → Notion</span>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn ghost" id="btn-reset">Reset</button>
+  <button class="btn" id="btn-download">Download .html</button>
+  <button class="btn primary" id="btn-copy">Copy HTML</button>
+</header>
+
+<main>
+  <div class="panel left">
+    <section>
+      <h2>Add a block</h2>
+      <div class="library" id="library"></div>
+    </section>
+    <section>
+      <h2>Page order</h2>
+      <div class="layers" id="layers"></div>
+    </section>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="stage-label"><span>preview — what Notion will render</span></div>
+    <div class="page" id="page"><div class="blocks" id="page-blocks"></div></div>
+  </div>
+
+  <div class="panel right">
+    <div id="inspector"></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ============================== block model ============================== */
+
+const BLOCK_DEFS = {
+  navbar: {
+    label: "Nav bar", glyph: "▤",
+    defaults: {
+      brand: "My Space", links: "Overview\nProjects\nNotes\nArchive",
+      outlineColor: "#1d1a16", outlineWidth: 2, tintColor: "#f5f0e6", tintStrength: 100, radius: 10,
+    },
+    fields: [
+      { key: "brand", label: "Brand text", type: "text" },
+      { key: "links", label: "Links (one per line)", type: "textarea" },
+    ],
+  },
+  cover: {
+    label: "Cover banner", glyph: "▦",
+    defaults: {
+      kicker: "Q3 · Planning", title: "Project Horizon",
+      subtitle: "Everything the team needs for the quarter, in one place.",
+      align: "left",
+      outlineColor: "#2743e3", outlineWidth: 2, tintColor: "#2743e3", tintStrength: 8, radius: 14,
+    },
+    fields: [
+      { key: "kicker", label: "Kicker (small line)", type: "text" },
+      { key: "title", label: "Title", type: "text" },
+      { key: "subtitle", label: "Subtitle", type: "textarea" },
+      { key: "align", label: "Alignment", type: "select", options: ["left", "center"] },
+    ],
+  },
+  columns: {
+    label: "Two columns", glyph: "▥",
+    defaults: {
+      leftHeading: "Now", leftBody: "Ship the styled-block generator.\nDraft the outline map spec.",
+      rightHeading: "Next", rightBody: "Notion API plumbing.\nPage picker + caching.",
+      outlineColor: "#1d1a16", outlineWidth: 1, tintColor: "#ffffff", tintStrength: 0, radius: 10,
+    },
+    fields: [
+      { key: "leftHeading", label: "Left heading", type: "text" },
+      { key: "leftBody", label: "Left body", type: "textarea" },
+      { key: "rightHeading", label: "Right heading", type: "text" },
+      { key: "rightBody", label: "Right body", type: "textarea" },
+    ],
+  },
+  callout: {
+    label: "Callout card", glyph: "❑",
+    defaults: {
+      emoji: "💡", title: "Heads up",
+      body: "The mind map app reads this page live — refresh there after editing here.",
+      outlineColor: "#d94f2b", outlineWidth: 2, tintColor: "#d94f2b", tintStrength: 9, radius: 12,
+    },
+    fields: [
+      { key: "emoji", label: "Emoji", type: "text" },
+      { key: "title", label: "Title", type: "text" },
+      { key: "body", label: "Body", type: "textarea" },
+    ],
+  },
+  plain: {
+    label: "Plain block", glyph: "≡",
+    defaults: {
+      heading: "Notes",
+      body: "A plain framed block for ordinary prose. Blank line makes a new paragraph.",
+      outlineColor: "#8a8271", outlineWidth: 1, tintColor: "#f5f0e6", tintStrength: 45, radius: 8,
+    },
+    fields: [
+      { key: "heading", label: "Heading (optional)", type: "text" },
+      { key: "body", label: "Body", type: "textarea" },
+    ],
+  },
+};
+
+const COMMON_FIELDS = [
+  { key: "outlineColor", label: "Outline color", type: "color" },
+  { key: "outlineWidth", label: "Outline width", type: "range", min: 0, max: 4, unit: "px" },
+  { key: "tintColor", label: "Fill tint", type: "color" },
+  { key: "tintStrength", label: "Tint strength", type: "range", min: 0, max: 100, unit: "%" },
+  { key: "radius", label: "Corner radius", type: "range", min: 0, max: 24, unit: "px" },
+];
+
+const PAGE_FIELDS = [
+  { key: "pageBg", label: "Page background", type: "color" },
+  { key: "typeface", label: "Typeface", type: "select", options: ["sans", "serif"] },
+  { key: "maxWidth", label: "Content width", type: "range", min: 480, max: 900, unit: "px" },
+];
+
+const STORAGE_KEY = "block-foundry-v1";
+let uid = 1;
+const newId = () => "b" + (uid++);
+
+function starterState() {
+  const mk = (type) => ({ id: newId(), type, props: { ...BLOCK_DEFS[type].defaults } });
+  return {
+    page: { pageBg: "#ffffff", typeface: "sans", maxWidth: 680 },
+    blocks: [mk("navbar"), mk("cover"), mk("columns"), mk("callout"), mk("plain")],
+    selectedId: null,
+  };
+}
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return starterState();
+    const s = JSON.parse(raw);
+    if (!s || !Array.isArray(s.blocks) || !s.page) return starterState();
+    const maxNum = s.blocks.reduce((m, b) => Math.max(m, parseInt(String(b.id).slice(1), 10) || 0), 0);
+    uid = maxNum + 1;
+    return s;
+  } catch { return starterState(); }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+/* ============================== helpers ============================== */
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function hexToRgba(hex, alphaPct) {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return `rgba(${r},${g},${b},${(alphaPct / 100).toFixed(2)})`;
+}
+function paragraphs(text) {
+  const parts = String(text ?? "").split(/\n\s*\n/).filter(p => p.trim());
+  return parts.map((p, i) =>
+    `<p style="margin:0${i < parts.length - 1 ? " 0 8px" : ""};">${esc(p.trim()).replace(/\n/g, "<br>")}</p>`
+  ).join("");
+}
+function lines(text) {
+  return String(text ?? "").split("\n").map(l => l.trim()).filter(Boolean);
+}
+
+/* ==================== block renderer (preview + export) ==================== */
+/* One renderer, inline styles only, so the preview IS the export. */
+
+function frameStyle(p) {
+  const border = p.outlineWidth > 0 ? `border:${p.outlineWidth}px solid ${p.outlineColor};` : "";
+  const bg = p.tintStrength > 0 ? `background:${hexToRgba(p.tintColor, p.tintStrength)};` : "";
+  return `${border}${bg}border-radius:${p.radius}px;`;
+}
+
+function renderBlock(block) {
+  const p = block.props;
+  const frame = frameStyle(p);
+  switch (block.type) {
+    case "navbar": {
+      const links = lines(p.links).map(l =>
+        `<span style="font-size:13.5px;font-weight:500;opacity:.75;">${esc(l)}</span>`
+      ).join('<span style="opacity:.3;">·</span>');
+      return `<div style="${frame}padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <strong style="font-size:15px;letter-spacing:-.01em;">${esc(p.brand)}</strong>
+        <span style="flex:1;"></span>${links}</div>`;
+    }
+    case "cover": {
+      const align = p.align === "center" ? "center" : "left";
+      return `<div style="${frame}padding:34px 28px;text-align:${align};">
+        ${p.kicker ? `<div style="font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-bottom:10px;">${esc(p.kicker)}</div>` : ""}
+        <div style="font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15;">${esc(p.title)}</div>
+        ${p.subtitle ? `<div style="font-size:15px;opacity:.72;margin-top:10px;line-height:1.5;max-width:52ch;${align === "center" ? "margin-left:auto;margin-right:auto;" : ""}">${esc(p.subtitle)}</div>` : ""}
+      </div>`;
+    }
+    case "columns": {
+      const col = (h, b) => `<div style="flex:1;min-width:200px;">
+        ${h ? `<div style="font-size:14px;font-weight:600;margin-bottom:6px;">${esc(h)}</div>` : ""}
+        <div style="font-size:13.5px;line-height:1.55;opacity:.85;">${paragraphs(b)}</div></div>`;
+      return `<div style="${frame}padding:20px 22px;display:flex;gap:24px;flex-wrap:wrap;">
+        ${col(p.leftHeading, p.leftBody)}${col(p.rightHeading, p.rightBody)}</div>`;
+    }
+    case "callout": {
+      return `<div style="${frame}padding:16px 18px;display:flex;gap:13px;align-items:flex-start;">
+        <div style="font-size:21px;line-height:1.2;">${esc(p.emoji)}</div>
+        <div style="flex:1;">
+          ${p.title ? `<div style="font-size:14px;font-weight:600;margin-bottom:3px;">${esc(p.title)}</div>` : ""}
+          <div style="font-size:13.5px;line-height:1.5;opacity:.85;">${paragraphs(p.body)}</div>
+        </div></div>`;
+    }
+    case "plain": {
+      return `<div style="${frame}padding:18px 20px;">
+        ${p.heading ? `<div style="font-size:15px;font-weight:600;margin-bottom:7px;">${esc(p.heading)}</div>` : ""}
+        <div style="font-size:14px;line-height:1.6;opacity:.88;">${paragraphs(p.body)}</div></div>`;
+    }
+  }
+  return "";
+}
+
+const FONT_STACKS = {
+  sans: 'ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif',
+  serif: 'Georgia,"Times New Roman",serif',
+};
+
+function buildExportDoc() {
+  const pg = state.page;
+  const body = state.blocks.map(renderBlock).join("\n");
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Styled block</title>
+</head>
+<body style="margin:0;background:${pg.pageBg};color:#1f1f1f;font-family:${FONT_STACKS[pg.typeface] || FONT_STACKS.sans};">
+<div style="max-width:${pg.maxWidth}px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:16px;">
+${body}
+</div>
+</body>
+</html>`;
+}
+
+/* ============================== rendering UI ============================== */
+
+const $ = (id) => document.getElementById(id);
+
+function renderLibrary() {
+  $("library").innerHTML = Object.entries(BLOCK_DEFS).map(([type, def]) =>
+    `<button class="lib-item" data-add="${type}"><span class="glyph">${def.glyph}</span>${def.label}</button>`
+  ).join("");
+}
+
+function blockTitle(b) {
+  const p = b.props;
+  return p.title || p.brand || p.heading || p.leftHeading || BLOCK_DEFS[b.type].label;
+}
+
+function renderLayers() {
+  const el = $("layers");
+  if (!state.blocks.length) {
+    el.innerHTML = `<div class="layers-empty">No blocks yet — add one above.</div>`;
+    return;
+  }
+  el.innerHTML = state.blocks.map((b, i) => `
+    <div class="layer ${b.id === state.selectedId ? "selected" : ""}" data-sel="${b.id}">
+      <span class="dot" style="background:${b.props.outlineColor}"></span>
+      <span class="name">${esc(blockTitle(b))}</span>
+      <span class="kind">${BLOCK_DEFS[b.type].label.split(" ")[0]}</span>
+      <button class="icon-btn" data-up="${i}" title="Move up">▲</button>
+      <button class="icon-btn" data-down="${i}" title="Move down">▼</button>
+    </div>`).join("");
+}
+
+function renderPreview() {
+  const pg = state.page;
+  const page = $("page");
+  page.style.maxWidth = (pg.maxWidth + 60) + "px";
+  page.style.background = pg.pageBg;
+  page.style.fontFamily = FONT_STACKS[pg.typeface] || FONT_STACKS.sans;
+  const holder = $("page-blocks");
+  if (!state.blocks.length) {
+    holder.innerHTML = `<div class="page-empty">An empty page — add blocks from the left.</div>`;
+    return;
+  }
+  holder.innerHTML = state.blocks.map(b =>
+    `<div class="pv-wrap ${b.id === state.selectedId ? "selected" : ""}" data-sel="${b.id}">${renderBlock(b)}</div>`
+  ).join("");
+}
+
+function fieldHTML(f, value, scope) {
+  const id = `f-${scope}-${f.key}`;
+  if (f.type === "text")
+    return `<div class="field"><label for="${id}">${f.label}</label>
+      <input type="text" id="${id}" data-scope="${scope}" data-key="${f.key}" value="${esc(value)}"></div>`;
+  if (f.type === "textarea")
+    return `<div class="field"><label for="${id}">${f.label}</label>
+      <textarea id="${id}" data-scope="${scope}" data-key="${f.key}">${esc(value)}</textarea></div>`;
+  if (f.type === "select")
+    return `<div class="field"><label for="${id}">${f.label}</label>
+      <select id="${id}" data-scope="${scope}" data-key="${f.key}">
+      ${f.options.map(o => `<option value="${o}" ${o === value ? "selected" : ""}>${o}</option>`).join("")}
+      </select></div>`;
+  if (f.type === "color")
+    return `<div class="field"><label for="${id}">${f.label}</label>
+      <div class="swatch-row">
+        <input type="color" id="${id}" data-scope="${scope}" data-key="${f.key}" value="${esc(value)}">
+        <output>${esc(value)}</output>
+      </div></div>`;
+  if (f.type === "range")
+    return `<div class="field"><label for="${id}">${f.label}
+      <span class="range-val">${value}${f.unit}</span></label>
+      <input type="range" id="${id}" data-scope="${scope}" data-key="${f.key}"
+        min="${f.min}" max="${f.max}" value="${value}"></div>`;
+  return "";
+}
+
+function renderInspector() {
+  const el = $("inspector");
+  const sel = state.blocks.find(b => b.id === state.selectedId);
+  let html = "";
+  if (sel) {
+    const def = BLOCK_DEFS[sel.type];
+    html += `<section><h2>${def.label} — content</h2>` +
+      def.fields.map(f => fieldHTML(f, sel.props[f.key], "block")).join("") + `</section>`;
+    html += `<section><h2>Frame</h2>` +
+      COMMON_FIELDS.map(f => fieldHTML(f, sel.props[f.key], "block")).join("") +
+      `<div class="danger-row">
+         <button class="btn ghost" id="btn-dupe">Duplicate</button>
+         <button class="btn ghost" id="btn-delete">Delete block</button>
+       </div></section>`;
+  } else {
+    html += `<div class="inspector-empty">Click a block in the preview to edit it. These settings apply to the whole page:</div>`;
+  }
+  html += `<section><h2>Page</h2>` +
+    PAGE_FIELDS.map(f => fieldHTML(f, state.page[f.key], "page")).join("") + `</section>`;
+  el.innerHTML = html;
+}
+
+function renderAll() {
+  renderLayers();
+  renderPreview();
+  renderInspector();
+  save();
+}
+
+/* ============================== events ============================== */
+
+document.addEventListener("click", (e) => {
+  const add = e.target.closest("[data-add]");
+  if (add) {
+    const type = add.dataset.add;
+    const block = { id: newId(), type, props: { ...BLOCK_DEFS[type].defaults } };
+    state.blocks.push(block);
+    state.selectedId = block.id;
+    renderAll();
+    return;
+  }
+  const up = e.target.closest("[data-up]");
+  if (up) {
+    const i = +up.dataset.up;
+    if (i > 0) [state.blocks[i - 1], state.blocks[i]] = [state.blocks[i], state.blocks[i - 1]];
+    renderAll();
+    e.stopPropagation();
+    return;
+  }
+  const down = e.target.closest("[data-down]");
+  if (down) {
+    const i = +down.dataset.down;
+    if (i < state.blocks.length - 1)
+      [state.blocks[i + 1], state.blocks[i]] = [state.blocks[i], state.blocks[i + 1]];
+    renderAll();
+    e.stopPropagation();
+    return;
+  }
+  const sel = e.target.closest("[data-sel]");
+  if (sel) {
+    state.selectedId = state.selectedId === sel.dataset.sel && !sel.classList.contains("pv-wrap")
+      ? null : sel.dataset.sel;
+    renderAll();
+    return;
+  }
+  if (e.target.id === "btn-delete") {
+    state.blocks = state.blocks.filter(b => b.id !== state.selectedId);
+    state.selectedId = null;
+    renderAll();
+  }
+  if (e.target.id === "btn-dupe") {
+    const i = state.blocks.findIndex(b => b.id === state.selectedId);
+    if (i >= 0) {
+      const copy = { id: newId(), type: state.blocks[i].type, props: { ...state.blocks[i].props } };
+      state.blocks.splice(i + 1, 0, copy);
+      state.selectedId = copy.id;
+      renderAll();
+    }
+  }
+});
+
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (!t.dataset || !t.dataset.key) return;
+  const key = t.dataset.key;
+  let val = t.value;
+  if (t.type === "range") val = +val;
+  if (t.dataset.scope === "page") {
+    state.page[key] = val;
+  } else {
+    const sel = state.blocks.find(b => b.id === state.selectedId);
+    if (!sel) return;
+    sel.props[key] = val;
+  }
+  // live-update without rebuilding the inspector (keeps focus in the field)
+  if (t.type === "range") {
+    const lab = t.previousElementSibling?.querySelector?.(".range-val")
+      || t.closest(".field")?.querySelector(".range-val");
+    if (lab) {
+      const f = [...COMMON_FIELDS, ...PAGE_FIELDS].find(f => f.key === key);
+      lab.textContent = val + (f?.unit || "");
+    }
+  }
+  if (t.type === "color") {
+    const out = t.parentElement.querySelector("output");
+    if (out) out.textContent = val;
+  }
+  renderLayers();
+  renderPreview();
+  save();
+});
+
+/* header actions */
+$("btn-copy").addEventListener("click", async () => {
+  const doc = buildExportDoc();
+  try {
+    await navigator.clipboard.writeText(doc);
+    toast("HTML copied — paste it into a Notion HTML block");
+  } catch {
+    // clipboard API can be blocked on file:// — fall back to a prompt
+    window.prompt("Copy the HTML below:", doc);
+  }
+});
+
+$("btn-download").addEventListener("click", () => {
+  const blob = new Blob([buildExportDoc()], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "styled-block.html";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Downloaded styled-block.html");
+});
+
+$("btn-reset").addEventListener("click", () => {
+  if (!confirm("Reset to the starter page? Your current blocks will be lost.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  uid = 1;
+  state = starterState();
+  renderAll();
+});
+
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+/* boot */
+renderLibrary();
+renderAll();
+</script>
+</body>
+</html>

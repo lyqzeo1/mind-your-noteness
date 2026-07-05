@@ -1,0 +1,12 @@
+{
+  "name": "mind-your-noteness",
+  "version": "1.0.0",
+  "description": "Companion web app that renders a Notion page as an outline mind map (read-only).",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>mind your noteness</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ SCREEN 1 — PAGE PICKER ============ -->
+<main class="picker" id="view-picker">
+  <div>
+    <div class="picker__brand"><span class="brand-dot"></span><h1>mind your noteness</h1></div>
+    <p class="picker__tagline">read-only mind maps of your Notion pages</p>
+  </div>
+
+  <div class="picker__controls">
+    <label class="search"><span class="search__icon">⌕</span><input id="picker-search" type="text" placeholder="filter pages…" autocomplete="off"></label>
+    <button class="btn btn--ghost" id="btn-reload-pages">↻ refresh list</button>
+  </div>
+
+  <div class="pagelist" id="picker-list"></div>
+
+  <div class="empty is-hidden" id="picker-empty">
+    <span class="empty__glyph">◫</span>
+    <h2>No pages shared yet</h2>
+    <p>In Notion, open a page → <kbd>•••</kbd> → Connections → Add connections → <strong>mind-your-noteness</strong>. Then refresh this list. Children of a shared page are inherited.</p>
+    <button class="btn btn--primary" id="btn-empty-refresh">↻ Refresh</button>
+  </div>
+
+  <div class="error is-hidden" id="picker-error">
+    <span class="error__glyph">!</span>
+    <p id="picker-error-text"></p>
+  </div>
+
+  <div class="picker__loading is-hidden" id="picker-loading"><span class="spinner"></span> asking Notion for shared pages…</div>
+</main>
+
+<!-- ============ SCREEN 2 — MAP VIEW ============ -->
+<div class="map-screen is-hidden" id="view-map">
+
+  <header class="topbar">
+    <button class="topbar__brand" id="btn-brand" title="back to picker"><span class="brand-dot"></span><span class="topbar__wordmark">mind your noteness</span></button>
+    <span class="topbar__divider"></span>
+    <span class="topbar__page"><span id="topbar-icon"></span>&nbsp;<span class="topbar__page-title" id="topbar-title"></span></span>
+    <span class="topbar__spacer"></span>
+    <span class="topbar__sync" id="topbar-sync"></span>
+    <button class="btn btn--ghost topbar__change" id="btn-change">change page</button>
+    <button class="btn btn--primary" id="btn-refresh">↻ <span class="btn__label">Refresh</span></button>
+  </header>
+
+  <div class="banner is-hidden" id="stale-banner">
+    <span><strong>Page changed in Notion</strong> — refresh to update the map.</span>
+    <button class="banner__action" id="btn-stale-refresh">Refresh now</button>
+    <button class="banner__close" id="btn-stale-dismiss" title="dismiss">✕</button>
+  </div>
+
+  <div class="map-viewport" id="canvas">
+    <div class="map-world" id="world">
+      <svg class="edges" id="edges" width="1" height="1"></svg>
+      <div id="nodes"></div>
+    </div>
+
+    <div class="breadcrumb is-hidden" id="breadcrumb"></div>
+
+    <div class="filterbar" id="filterbar">
+      <button class="chip" data-type="paragraph">¶<span class="chip__label"> paragraphs</span></button>
+      <button class="chip" data-type="bullet">•<span class="chip__label"> bullets</span></button>
+      <button class="chip" data-type="quote">❝<span class="chip__label"> quotes</span></button>
+      <span class="filterbar__divider"></span>
+      <label class="filterbar__keyword">⌕<input id="keyword" type="text" placeholder="keyword…" autocomplete="off"></label>
+      <button class="filterbar__toggle" id="filter-toggle">⌄</button>
+    </div>
+
+    <button class="recenter" id="btn-fit">⌖ fit</button>
+
+    <div class="loading is-hidden" id="map-loading">
+      <div class="loading__pill"><span class="spinner"></span>Fetching page…</div>
+    </div>
+
+    <aside class="detail is-hidden" id="detail">
+      <div class="detail__chrome" id="detail-chrome">
+        <div class="detail__handle"></div>
+        <div class="detail__header">
+          <span class="card__tag" id="detail-kicker"></span>
+          <span class="detail__title" id="detail-title"></span>
+          <button class="detail__close" id="detail-close" title="close">✕</button>
+        </div>
+      </div>
+      <div class="detail__body" id="detail-body"></div>
+    </aside>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
